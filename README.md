@@ -1,5 +1,88 @@
 # LAPACK
 
+## 在Windows中编译
+
+### MinGW64
+
+```bash
+mkdir build
+cd build
+cmake -DBUILD_SHARED_LIBS=ON -DCBLAS=ON -DLAPACKE=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../dist/cblas ..
+ninja -j4
+ninja install
+```
+
+在编译的时候，我们可能会遇到`f951.exe: Fatal Error: Reading module 'SRC/la_constants.mod' at line 26 column 2: Unexpected EOF compilation terminated.`的问题。从谷歌的结果来看，它被gfortran的版本引起，能够解决此问题的版本是`gfortran8.3.0`或者`gfortran8.2.0`，最新的msys2安装的版本太新了，无法回退到老版本，无法编译`lapack`部分。
+
+**仅仅编译BLAS与CBLAS部分**
+
+```bash
+cp make.inc.example make.inc
+make blaslib
+make cblaslib
+```
+
+在`lapack`目录下下会生成`librefblas.a`和`libcblas.a`，继续可以生成`libcblas.dll`动态链接库
+
+```bash
+CBLAS_OBJS=`ls CBLAS/src/*.o`
+gcc -shared -fPIC -o libcblas.dll $CBLAS_OBJS -L . -lrefblas 
+```
+
+查看`libcblas.dll`的依赖关系
+
+```bash
+dumpbin /dependents libcblas.dll
+Microsoft (R) COFF/PE Dumper Version 14.16.27048.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file libcblas.dll
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    KERNEL32.dll
+    msvcrt.dll
+
+  Summary
+
+        1000 .CRT
+        1000 .bss
+        1000 .data
+        3000 .debug_abbrev
+        1000 .debug_aranges
+        3000 .debug_frame
+       10000 .debug_info
+        7000 .debug_line
+        3000 .debug_line_str
+        8000 .debug_loclists
+        1000 .debug_rnglists
+        1000 .debug_str
+        2000 .edata
+        1000 .idata
+        2000 .pdata
+        8000 .rdata
+        1000 .reloc
+       68000 .text
+        1000 .tls
+        2000 .xdata
+```
+
+我们采用了静态的`librefblas.a`作为连接，所以未产生与`libgfortran`的依赖关系。
+
+
+
+## 参考
+
+- [LAPACK for Windows](https://icl.utk.edu/lapack-for-windows/lapack/)
+- [Visual Studio dumpbin](https://docs.microsoft.com/en-us/cpp/build/reference/dash-exports?view=msvc-170)
+- [compiler-errors - Msys2-> f951.exe](https://string.quest/read/16566271)
+- [[Msys2 -> f951.exe](https://stackoverflow.com/questions/54824530/msys2-f951-exe-fatal-error-reading-module-at-line-2-column-1-unexpec)](https://stackoverflow.com/questions/54824530/msys2-f951-exe-fatal-error-reading-module-at-line-2-column-1-unexpec)
+
+
+
 [![Build Status](https://travis-ci.org/Reference-LAPACK/lapack.svg?branch=master)](https://travis-ci.org/Reference-LAPACK/lapack)
 ![CMake](https://github.com/Reference-LAPACK/lapack/actions/workflows/cmake.yml/badge.svg)
 ![Makefile](https://github.com/Reference-LAPACK/lapack/actions/workflows/makefile.yml/badge.svg)
