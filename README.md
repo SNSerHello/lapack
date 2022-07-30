@@ -26,7 +26,8 @@ make cblaslib
 
 ```bash
 CBLAS_OBJS=`ls CBLAS/src/*.o`
-gcc -shared -fPIC -o libcblas.dll $CBLAS_OBJS -L . -lrefblas 
+gcc -shared -fPIC -o libcblas.dll $CBLAS_OBJS -L . -lrefblas
+lib -machine:x64 -def:libcblas.def -out:libcblas.lib
 ```
 
 查看`libcblas.dll`的依赖关系
@@ -80,6 +81,7 @@ File Type: DLL
 - [Visual Studio dumpbin](https://docs.microsoft.com/en-us/cpp/build/reference/dash-exports?view=msvc-170)
 - [compiler-errors - Msys2-> f951.exe](https://string.quest/read/16566271)
 - [[Msys2 -> f951.exe](https://stackoverflow.com/questions/54824530/msys2-f951-exe-fatal-error-reading-module-at-line-2-column-1-unexpec)](https://stackoverflow.com/questions/54824530/msys2-f951-exe-fatal-error-reading-module-at-line-2-column-1-unexpec)
+- [Creating an Import Library](https://gcc.gnu.org/onlinedocs/gnat_ugn/Creating-an-Import-Library.html)
 
 
 
