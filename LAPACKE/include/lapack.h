@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 /* It seems all current Fortran compilers put strlen at end.
 *  Some historical compilers put strlen after the str argument
@@ -80,11 +81,26 @@ extern "C" {
 
 /*----------------------------------------------------------------------------*/
 #ifndef lapack_int
-#define lapack_int     int
+#if defined(LAPACK_ILP64)
+#define lapack_int        int64_t
+#else
+#define lapack_int        int32_t
+#endif
+#endif
+
+/*
+ * Integer format string
+ */
+#ifndef LAPACK_IFMT
+#if defined(LAPACK_ILP64)
+#define LAPACK_IFMT       PRId64
+#else
+#define LAPACK_IFMT       PRId32
+#endif
 #endif
 
 #ifndef lapack_logical
-#define lapack_logical lapack_int
+#define lapack_logical    lapack_int
 #endif
 
 /* f2c, hence clapack and MacOS Accelerate, returns double instead of float
@@ -115,7 +131,7 @@ typedef lapack_logical (*LAPACK_Z_SELECT2)
     ( const lapack_complex_double*, const lapack_complex_double* );
 
 #define LAPACK_lsame_base LAPACK_GLOBAL(lsame,LSAME)
-lapack_logical LAPACK_lsame_base( char* ca,  char* cb,
+lapack_logical LAPACK_lsame_base( const char* ca,  const char* cb,
                               lapack_int lca, lapack_int lcb
 #ifdef LAPACK_FORTRAN_STRLEN_END
     , size_t, size_t
